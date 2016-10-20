@@ -626,10 +626,63 @@ else
 fi
 
 echo ${#LINODEID}
-echo $header
 
 if [ ${#LINODEID} != 0 ]
 then
+
+  # ipurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.ip.addpublic&LinodeID=$LINODEID"
+
+  # echo $ipurl
+  # echo "Getting my ipaddress ......"
+
+  # ipcontent=$(curl -H "${header}" -XGET "${ipurl}")
+
+  # if [ ${#ipcontent} != 0  ]
+  # then
+  #   error=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['ERRORARRAY']"`
+    
+  #   if [[ ${#error[@]} -eq 1 ]]
+  #   then
+  #     IPADDRESS=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA']['IPADDRESS']"`
+  #     IPADDRESSID=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA']['IPADDRESSID']"`
+  #     echo "IP Address of the box - $IPADDRESS"
+  #   else
+  #     echo "Process failed while fetching ip address"
+  #     echo $error
+  #     exit 1
+  #   fi
+  # else
+  #   echo "curl: (35) Server aborted the SSL handshake or Check your network"
+  #   exit 1
+  # fi
+
+  DISTRIBUTIONLABEL="${LABEL}-${DISTRIBUTIONNNAME}"
+  distributionurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.disk.createfromdistribution&LinodeID=$LINODEID&Label=$LABEL&Size=$DISKSPACE&rootPass=$ROOTPWD&DistributionID=$DISTRIBUTIONID"
+
+  echo $distributionurl
+  echo "Creating HD along with distribution on disk ......"
+
+  distributioncontent=$(curl -H "${header}" -XGET "${distributionurl}")
+
+  if [ ${#distributioncontent} != 0  ]
+  then
+    error=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['ERRORARRAY']"`
+    
+    if [[ ${#error[@]} -eq 1 ]]
+    then
+      DISTRIBUTIONJOBID=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['DATA']['JobID']"`
+      DISTRIBUTIONDISKID=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['DATA']['DiskID']"`
+      echo "JobID for creating HD with distribution space on disk - $DISTRIBUTIONJOBID"
+      echo "DiskID for the server - $DISTRIBUTIONDISKID"
+    else
+      echo "Process have been stopped when creating HD along with distribution on disk"
+      echo $error
+      exit 1
+    fi
+  else
+    echo "curl: (35) Server aborted the SSL handshake or Check your network"
+    exit 1
+  fi
   
   # AVAILABLE ext3, ext4, swap, raw TYPE
   TYPE="swap"
@@ -663,33 +716,7 @@ then
     exit 1
   fi
 
-  DISTRIBUTIONLABEL="${LABEL}-${DISTRIBUTIONNNAME}"
-  distributionurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.disk.createfromdistribution&LinodeID=$LINODEID&Label=$LABEL&Size=$DISKSPACE&rootPass=$ROOTPWD&DistributionID=$DISTRIBUTIONID"
 
-  echo $distributionurl
-  echo "Creating HD along with distribution on disk ......"
-
-  distributioncontent=$(curl -H "${header}" -XGET "${distributionurl}")
-
-  if [ ${#distributioncontent} != 0  ]
-  then
-    error=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['ERRORARRAY']"`
-    
-    if [[ ${#error[@]} -eq 1 ]]
-    then
-      DISTRIBUTIONJOBID=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['DATA']['JobID']"`
-      DISTRIBUTIONDISKID=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['DATA']['DiskID']"`
-      echo "JobID for creating HD with distribution space on disk - $DISTRIBUTIONJOBID"
-      echo "DiskID for the server - $DISTRIBUTIONDISKID"
-    else
-      echo "Process have been stopped when creating HD along with distribution on disk"
-      echo $error
-      exit 1
-    fi
-  else
-    echo "curl: (35) Server aborted the SSL handshake or Check your network"
-    exit 1
-  fi
 
   # Need to update whenever there is a new update
   KERNALID=138
@@ -721,6 +748,31 @@ then
     exit 1
   fi
 
+  # Boot api ConfigId can also be added only when we have more than one config. It happens when we do backup recovery
+  booturl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.boot&LinodeID=$LINODEID"
+
+  echo $booturl
+  echo "Booting the disk ......"
+
+  bootcontent=$(curl -H "${header}" -XGET "${booturl}")
+
+  if [ ${#bootcontent} != 0  ]
+  then
+    error=`python -c "import sys, json; print json.loads(json.dumps($bootcontent))['ERRORARRAY']"`
+    
+    if [[ ${#error[@]} -eq 1 ]]
+    then
+      BOOTJOBID=`python -c "import sys, json; print json.loads(json.dumps($bootcontent))['DATA']['JobID']"`
+      echo "Boot job id for Box $LABEL - $BOOTJOBID"
+    else
+      echo "Process have been stopped while booting the box"
+      echo $error
+      exit 1
+    fi
+  else
+    echo "curl: (35) Server aborted the SSL handshake or Check your network"
+    exit 1
+  fi
 else
   exit 1
 fi
