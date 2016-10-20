@@ -2,6 +2,10 @@
 
 # Take input from users if environment variable is not present.
 
+# redirect stdout/stderr to a file
+touch log.txt
+exec &> log.txt
+
 if [ $LINODEKEY ]
 then
   echo "Linode Key has been taken from environment variable !!"
@@ -630,31 +634,33 @@ echo ${#LINODEID}
 if [ ${#LINODEID} != 0 ]
 then
 
-  # ipurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.ip.addpublic&LinodeID=$LINODEID"
+  ipurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.ip.list&LinodeID=$LINODEID"
 
-  # echo $ipurl
-  # echo "Getting my ipaddress ......"
+  echo $ipurl
+  echo "Getting my ipaddress ......"
 
-  # ipcontent=$(curl -H "${header}" -XGET "${ipurl}")
+  ipcontent=$(curl -H "${header}" -XGET "${ipurl}")
 
-  # if [ ${#ipcontent} != 0  ]
-  # then
-  #   error=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['ERRORARRAY']"`
+  if [ ${#ipcontent} != 0  ]
+  then
+    error=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['ERRORARRAY']"`
     
-  #   if [[ ${#error[@]} -eq 1 ]]
-  #   then
-  #     IPADDRESS=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA']['IPADDRESS']"`
-  #     IPADDRESSID=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA']['IPADDRESSID']"`
-  #     echo "IP Address of the box - $IPADDRESS"
-  #   else
-  #     echo "Process failed while fetching ip address"
-  #     echo $error
-  #     exit 1
-  #   fi
-  # else
-  #   echo "curl: (35) Server aborted the SSL handshake or Check your network"
-  #   exit 1
-  # fi
+    if [[ ${#error[@]} -eq 1 ]]
+    then
+      data=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA']`
+      echo $data
+      IPADDRESS=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA'][0]['IPADDRESS']"`
+      IPADDRESSID=`python -c "import sys, json; print json.loads(json.dumps($ipcontent))['DATA'][0]['IPADDRESSID']"`
+      echo "IP Address of the box - $IPADDRESS"
+    else
+      echo "Process failed while fetching ip address"
+      echo $error
+      exit 1
+    fi
+  else
+    echo "curl: (35) Server aborted the SSL handshake or Check your network"
+    exit 1
+  fi
 
   DISTRIBUTIONLABEL="${LABEL}-${DISTRIBUTIONNNAME}"
   distributionurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.disk.createfromdistribution&LinodeID=$LINODEID&Label=$LABEL&Size=$DISKSPACE&rootPass=$ROOTPWD&DistributionID=$DISTRIBUTIONID"
@@ -688,7 +694,6 @@ then
   TYPE="swap"
   SWAPLABEL="${LABEL}-${TYPE}"
   
-
   swapurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.disk.create&LinodeID=$LINODEID&Label=$SWAPLABEL&Type=$TYPE&Size=$SWAPSIZE"
 
   echo $swapurl
@@ -716,12 +721,10 @@ then
     exit 1
   fi
 
-
-
   # Need to update whenever there is a new update
   KERNALID=138
   DISTRIBUTIONLABEL="${LABEL}-${DISTRIBUTIONNNAME}"
-  DISKLIST="${SWAPDISKID},${DISTRIBUTIONDISKID}"
+  DISKLIST="${DISTRIBUTIONDISKID},${SWAPDISKID}"
 
   configurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.config.create&LinodeID=$LINODEID&KernelID=$KERNALID&Label=$LABEL&DiskList=$DISKLIST"
 
@@ -773,6 +776,12 @@ then
     echo "curl: (35) Server aborted the SSL handshake or Check your network"
     exit 1
   fi
+
+
+
+
 else
   exit 1
 fi
+
+
