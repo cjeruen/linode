@@ -1,0 +1,10 @@
+spwan ssh sivakumar@103.3.63.43
+expect "password:"
+send "Links@1234\r"
+expect "$ "
+send "sudo apt-get install memcached\r"
+expect "password"
+send "Links@1234\r"
+expect "$ "
+send "exit\r"
+

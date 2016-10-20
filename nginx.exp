@@ -1,0 +1,38 @@
+spawn ssh sivakumar@103.3.63.43
+expect "password:"
+send "Links@1234\r"
+expect "$ "
+send "sudo apt-get install libpcre3-dev build-essential libssl-dev\r"
+expect "password for"
+send "Links@1234\r"
+expect "Do you want to continue [Y/n]"
+send "Y"
+expect "$ "
+send "cd /opt\r"
+expect "$ "
+send "sudo wget http://nginx.org/download/nginx-1.8.0.tar.gz\r"
+expect "$ "
+send "sudo tar -zxvf nginx*.tar.gz\r"
+expect "$ "
+send "cd /opt/nginx-*\r"
+expect "$ "
+send "sudo ./configure --prefix=/opt/nginx --user=nginx --group=nginx --with-http_ssl_module\r"
+expect "$ "
+send "sudo make\r"
+expect "$ "
+send "sudo make install\r"
+expect "$ "
+send "sudo adduser --system --no-create-home --disabled-login --disabled-password --group nginx\r"
+expect "$ "
+send "sudo mv /home/sivakumar/nginx /etc/init.d/\r"
+expect "$ "
+send "sudo chmod +x /etc/init.d/nginx"
+expect "$ "
+send "sudo /usr/sbin/update-rc.d -f nginx defaults "
+expect "$ "
+send "sudo service nginx start"
+close
+
+
+
+

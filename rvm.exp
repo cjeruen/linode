@@ -1,0 +1,8 @@
+spawn ssh sivakumar@103.3.63.43
+expect "password:"
+send "Links@1234\r"
+expect "$ "
+send "gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3\r"
+expect "$ "
+send "\curl -sSL https://get.rvm.io | bash -s stable --ruby\r"
+expect "$ "
