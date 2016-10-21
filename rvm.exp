@@ -1,6 +1,6 @@
-spawn ssh sivakumar@103.3.63.43
+spawn ssh xxxxx@xxxxxx
 expect "password:"
-send "Links@1234\r"
+send "xxxxxxxxxx\r"
 expect "$ "
 send "gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3\r"
 expect "$ "

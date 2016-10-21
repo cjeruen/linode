@@ -1,4 +1,4 @@
-spawn ssh root@139.162.7.190
+spawn ssh xxxx@xxxxxxxxxx
 expect "Are you sure you want to continue connecting (yes/no)"
 send "yes\r"
 

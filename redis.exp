@@ -1,6 +1,6 @@
-spwan ssh sivakumar@103.3.63.43
+spwan ssh xxxxx@xxxxxxxxxx
 expect "password:"
-send "Links@1234\r"
+send "xxxxxxxxxxxx"
 expect "$ "
 send "wget http://download.redis.io/redis-stable.tar.gz\r"
 expect "$ "
@@ -18,7 +18,7 @@ send "cd/redis-stable/utils\r"
 expect "$ "
 send "sudo bash install_server.sh"
 expect "password"
-send "Links@1234\r"
+send "xxxxxxxxxx\r"
 expect "$ "
 send "\r"
 expect "$ "
