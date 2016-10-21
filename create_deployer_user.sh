@@ -15,17 +15,17 @@ fi
 echo "creating deployer"
 {
   /usr/bin/expect << EOF
-spawn ssh root@139.162.7.190
+spawn ssh xxxx@xxxxxxxxxxx
 expect "password: "
-send "Parity1234@\r"
+send "password\r"
 expect "$ "
 send "sudo adduser deployer\r"
 expect "password for deployer:"
-send "Parity1234@\r"
+send "password\r"
 expect "Enter new UNIX password:"
-send "Parity1234@\r"
+send "password\r"
 expect "Retype new UNIX password:"
-send "Parity1234@\r"
+send "password\r"
 send "error_function\r"
 expect "Full Name []:"
 send "\r"
@@ -46,5 +46,5 @@ EOF
 }
 ERR="user"
 error_function $ERR
-curl --url 'smtps://smtp.gmail.com:465' --ssl-reqd --mail-from 'iaansomhler@gmail.com' --mail-rcpt 'mothirajha.chandramohan@desidime.com' --upload-file log.txt --user 'iaansomhler@gmail.com:desi12345'
+curl --url 'smtps://smtp.gmail.com:465' --ssl-reqd --mail-from 'sender@gmail.com' --mail-rcpt 'rcpt@gmail.com' --upload-file log.txt --user 'sender@gmail.com:password'
 exit
