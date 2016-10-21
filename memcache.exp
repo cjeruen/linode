@@ -1,10 +1,17 @@
-spwan ssh sivakumar@103.3.63.43
-expect "password:"
-send "Links@1234\r"
-expect "$ "
-send "sudo apt-get install memcached\r"
-expect "password"
-send "Links@1234\r"
-expect "$ "
-send "exit\r"
+#!/user/bin/expect
 
+set timeout -1
+set ipaddress [lindex $argv 0]
+set password [lindex $argv 1]
+set user "root"
+
+spawn ssh "$user\@$ipaddress"
+expect "password:"
+send "$password\n"
+expect "$ "
+send "apt-get install memcached\n"
+expect "Do you want to continue\?"
+send "Y\n"
+expect "$ "
+send "exit\n"
+close

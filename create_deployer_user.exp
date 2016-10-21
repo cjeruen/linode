@@ -1,0 +1,34 @@
+#!/user/bin/expect
+
+set timeout -1
+set ipaddress [lindex $argv 0]
+set password [lindex $argv 1]
+set deployer_password [lindex $argv 2]
+set user "root"
+
+spawn ssh "$user\@$ipaddress"
+expect "Are you sure you want to continue connecting (yes/no)? "
+send "yes\n"
+expect "password"
+send "$password\n"
+expect "# "
+send "adduser deployer\n"
+expect "Enter new UNIX password:"
+send "$deployer_password\n"
+expect "Retype new UNIX password:"
+send "$deployer_password\n"
+expect "Full Name"
+send "\n"
+expect "Room Number"
+send "\n"
+expect "Work Phone"
+send "\n"
+expect "Home Phone"
+send "\n"
+expect "Other"
+send "\n"
+expect "Is the information correct?"
+send "Y\n"
+expect "# "
+send "exit\n"
+close

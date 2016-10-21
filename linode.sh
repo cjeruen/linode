@@ -2,10 +2,6 @@
 
 # Take input from users if environment variable is not present.
 
-# redirect stdout/stderr to a file
-touch log.txt
-exec &> log.txt
-
 if [ $LINODEKEY ]
 then
   echo "Linode Key has been taken from environment variable !!"
@@ -623,6 +619,7 @@ then
   then
     LINODEID=`python -c "import sys, json; print json.loads(json.dumps($content))['DATA']['LinodeID']"`
     echo $LINODEID
+    sleep 3
   fi
 else
   echo "curl: (35) Server aborted the SSL handshake or Check your network"
@@ -662,6 +659,10 @@ then
     exit 1
   fi
 
+  sleep 1
+
+  SSHKEY=$(cat ~/.ssh/id_rsa.pub)
+
   DISTRIBUTIONLABEL="${LABEL}-${DISTRIBUTIONNNAME}"
   distributionurl="https://api.linode.com/?api_key=$LINODEKEY&api_action=linode.disk.createfromdistribution&LinodeID=$LINODEID&Label=$LABEL&Size=$DISKSPACE&rootPass=$ROOTPWD&DistributionID=$DISTRIBUTIONID"
 
@@ -680,6 +681,7 @@ then
       DISTRIBUTIONDISKID=`python -c "import sys, json; print json.loads(json.dumps($distributioncontent))['DATA']['DiskID']"`
       echo "JobID for creating HD with distribution space on disk - $DISTRIBUTIONJOBID"
       echo "DiskID for the server - $DISTRIBUTIONDISKID"
+      sleep 3
     else
       echo "Process have been stopped when creating HD along with distribution on disk"
       echo $error
@@ -711,6 +713,7 @@ then
 
       echo "JobID for creating swap space on disk - $SWAPJOBID"
       echo "DiskID for the server - $SWAPDISKID"
+      sleep 3
     else
       echo "Process have been stopped when creating swap memory on disk"
       echo $error
@@ -741,6 +744,7 @@ then
     then
       CONFIGID=`python -c "import sys, json; print json.loads(json.dumps($configcontent))['DATA']['ConfigID']"`
       echo "ConfigId for box - $CONFIGID"
+      sleep 3
     else
       echo "Process have been stopped while creating config on disk"
       echo $error
@@ -777,11 +781,51 @@ then
     exit 1
   fi
 
-
-
-
 else
   exit 1
 fi
 
+read -p "Do you need to install memcache? [Y/N]" memcache_qa
 
+case $memcache_qa in
+  Y/y)
+    $MEMCACHE=1
+    ;;
+  N/n)
+    $MEMCACHE=0
+    ;;
+esac
+
+read -p "Do you need to install memcache? [Y/N]" memcache_qa
+case $memcache_qa in
+  [Yy]* )
+    echo "---"
+    MEMCACHE=1
+    ;;
+  [Nn]* )
+    MEMCACHE=0
+    ;;
+esac
+
+
+sleep 20
+
+# redirect stdout/stderr to a file
+touch log.txt
+exec &> log.txt
+
+# Always run create deployer as the first command
+DEPLOYERPASSWORD=$(echo $ROOTPWD | rev)
+userres=$(expect create_deployer_user.exp $IPADDRESS $ROOTPWD $DEPLOYERPASSWORD)
+echo $userres
+echo "----------------------------------"
+fail2ban=$(expect fail2ban.exp $IPADDRESS $ROOTPWD)
+echo $fail2ban
+echo "==================================="
+if [ MEMCACHE = 1 ]; then
+  memcache=$(expect memcache.exp $IPADDRESS $ROOTPWD)
+  echo $memcache
+  echo "==================================="
+fi
+
+curl --url 'smtps://smtp.gmail.com:465' --ssl-reqd --mail-from 'xyz@domain.com' --mail-rcpt 'abc@domain.com' --upload-file log.txt --user 'xyz@domain.com:password'

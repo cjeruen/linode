@@ -1,0 +1,25 @@
+#!/user/bin/expect
+
+set timeout -1
+set ipaddress [lindex $argv 0]
+set password [lindex $argv 1]
+set user "root"
+
+spawn ssh "$user\@$ipaddress"
+expect "password: "
+send "$password\n"
+expect "# "
+send "apt-get update && apt-get upgrade \n"
+expect "Do you want to continue\?"
+send "Y\n"
+expect "# "
+send "apt-get install fail2ban\n"
+expect "Do you want to continue\?"
+send "Y\n"
+expect "# "
+send "apt-get install htop\n"
+expect "Do you want to continue\?"
+send "Y\n"
+expect "# "
+send "exit\n"
+close
